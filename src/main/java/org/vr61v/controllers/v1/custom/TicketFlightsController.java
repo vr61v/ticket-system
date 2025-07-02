@@ -15,15 +15,21 @@ import org.vr61v.mappers.TicketFlightMapper;
 import org.vr61v.services.crud.FlightCrudService;
 import org.vr61v.services.crud.TicketCrudService;
 import org.vr61v.services.crud.TicketFlightCrudService;
+import org.vr61v.services.custom.TicketFlightCustomService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/ticketflights")
+@RequestMapping("api/v1/tickets/{no}/flights")
 public class TicketFlightsController {
 
     private final TicketFlightCrudService crudService;
+
+    private final TicketFlightCustomService customService;
 
     private final TicketCrudService ticketCrudService;
 
@@ -33,19 +39,21 @@ public class TicketFlightsController {
 
     public TicketFlightsController(
             TicketFlightCrudService ticketFlightCrudService,
+            TicketFlightCustomService customService,
             TicketCrudService ticketCrudService,
             FlightCrudService flightCrudService,
             TicketFlightMapper ticketFlightMapper
     ) {
         this.crudService = ticketFlightCrudService;
+        this.customService = customService;
         this.ticketCrudService = ticketCrudService;
         this.flightCrudService = flightCrudService;
         this.mapper = ticketFlightMapper;
     }
 
-    private TicketFlightID createId(String id, Integer no) {
-        Optional<Ticket> ticket = ticketCrudService.findById(id);
-        Optional<Flight> flight = flightCrudService.findById(no);
+    private TicketFlightID createId(String no, Integer id) {
+        Optional<Ticket> ticket = ticketCrudService.findById(no);
+        Optional<Flight> flight = flightCrudService.findById(id);
         if (ticket.isEmpty() || flight.isEmpty()) {
             throw new IllegalArgumentException("ticket or flight not found");
         }
@@ -55,56 +63,59 @@ public class TicketFlightsController {
                 .build();
     }
 
-    private TicketFlight getRequestEntity(String id, Integer no, TicketFlightDto body) {
+    private TicketFlight getRequestEntity(String no, Integer id, TicketFlightDto body) {
         TicketFlight entity = mapper.toEntity(body);
-        entity.setId(createId(id, no));
+        entity.setId(createId(no, id));
         return entity;
     }
 
-    private List<TicketFlight> getRequestEntityList(List<TicketFlightDto> body) {
+    private List<TicketFlight> getRequestEntityList(String no, List<TicketFlightDto> body) {
         List<TicketFlight> entities = new ArrayList<>();
         for (TicketFlightDto dto : body) {
             TicketFlight entity = mapper.toEntity(dto);
-            entity.setId(createId(dto.getTicketNo(), dto.getFlightId()));
+            entity.setId(createId(no, dto.getFlightId()));
             entities.add(entity);
         }
 
         return entities;
     }
 
-    @PostMapping("/{id}/{no}")
+    @PostMapping("{id}")
     public ResponseEntity<?> create(
-            @PathVariable String id,
-            @PathVariable("no") Integer no,
+            @PathVariable("no") String no,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody TicketFlightDto body
     ) {
-        log.info("Handling request to create the ticket flight entity with id:{}, no:{}", id, no);
-        TicketFlight entity = getRequestEntity(id, no, body);
-        log.info("Creating a new ticket flight entity with no:{}, body:{}", no, body);
+        log.info("Handling request to create the ticket flight entity with no:{}, id:{}", no, id);
+        TicketFlight entity = getRequestEntity(no, id, body);
+        log.info("Creating a new ticket flight entity with id:{}, body:{}", id, body);
         TicketFlight created = crudService.create(entity);
         TicketFlightDto dto = mapper.toDto(created);
-        log.info("Success created a new ticket flight with no:{}, dto:{}", no, dto);
+        log.info("Success created a new ticket flight with id:{}, dto:{}", id, dto);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
-    @PostMapping
-    public ResponseEntity<?> createAll(@Valid @RequestBody List<TicketFlightDto> body) {
+    @PostMapping()
+    public ResponseEntity<?> createAll(
+            @PathVariable("no") String no,
+            @Valid @RequestBody List<TicketFlightDto> body
+    ) {
         log.info("Handling request to create all size:{} ticket flight entities", body.size());
-        List<TicketFlight> entities = getRequestEntityList(body);
+        List<TicketFlight> entities = getRequestEntityList(no, body);
         List<TicketFlight> created = crudService.createAll(entities);
         List<TicketFlightDto> dtos = created.stream().map(mapper::toDto).toList();
         log.info("Success created all new ticket flight entities with dto size:{}", dtos.size());
         return new ResponseEntity<>(dtos, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}/{no}")
+    @PutMapping("{id}")
     public ResponseEntity<?> update(
-            @PathVariable String id,
-            @PathVariable("no") Integer no,
+            @PathVariable("no") String no,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody TicketFlightDto body
     ) {
         log.info("Handling request to update the ticket flight entity with id:{}", id);
-        TicketFlight entity = getRequestEntity(id, no, body);
+        TicketFlight entity = getRequestEntity(no, id, body);
         log.info("Updating the ticket flight entity with id:{}, body:{}", id, body);
         TicketFlight updated = crudService.update(entity);
         TicketFlightDto dto = mapper.toDto(updated);
@@ -113,21 +124,24 @@ public class TicketFlightsController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateAll(@Valid @RequestBody List<TicketFlightDto> body) {
+    public ResponseEntity<?> updateAll(
+            @PathVariable("no") String no,
+            @Valid @RequestBody List<TicketFlightDto> body
+    ) {
         log.info("Handling request to update all size:{} ticket flight entities", body.size());
-        List<TicketFlight> entities = getRequestEntityList(body);
+        List<TicketFlight> entities = getRequestEntityList(no, body);
         List<TicketFlight> updated = crudService.updateAll(entities);
         List<TicketFlightDto> dtos = updated.stream().map(mapper::toDto).toList();
         log.info("Success updating all ticket flight entities with dto size:{}", dtos.size());
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/{no}")
+    @GetMapping("{id}")
     public ResponseEntity<?> findById(
-            @PathVariable("id") String id,
-            @PathVariable("no") Integer no
+            @PathVariable("no") String no,
+            @PathVariable("id") Integer id
     ) {
-        TicketFlightID entityId = createId(id, no);
+        TicketFlightID entityId = createId(no, id);
         log.info("Handling request to find the ticket flight entity with id:{}", entityId);
         Optional<TicketFlight> found = crudService.findById(entityId);
         if (found.isPresent()) {
@@ -144,28 +158,28 @@ public class TicketFlightsController {
     }
 
     @GetMapping
-    public ResponseEntity<?> findAll() {
+    public ResponseEntity<?> findAll(@PathVariable("no") String ticketNo) {
         log.info("Handling request to find all ticket flight entities");
-        List<TicketFlight> found = crudService.findAll();
+        List<TicketFlight> found = customService.findTicketFlightsByTicketNo(ticketNo);
         List<TicketFlightDto> dtos = found.stream().map(mapper::toDto).toList();
         if (!dtos.isEmpty()) {
-            log.info("Success finding all ticket flight entities with dto size:{}", dtos.size());
+            log.info("Success finding all ticket flight entities with no:{} dto size:{}", ticketNo, dtos.size());
             return new ResponseEntity<>(dtos, HttpStatus.OK);
         } else {
-            log.warn("No ticket flight entities found");
+            log.warn("No ticket flight with no:{} entities found", ticketNo);
             return new ResponseEntity<>(
-                    "No ticket flight entities found",
+                    String.format("No ticket flight with no:%s entities found", ticketNo),
                     HttpStatus.NOT_FOUND
             );
         }
     }
 
-    @DeleteMapping("/{id}/{no}")
+    @DeleteMapping("{id}")
     public ResponseEntity<?> delete(
-            @PathVariable("id") String id,
-            @PathVariable("no") Integer no
+            @PathVariable("no") String no,
+            @PathVariable("id") Integer id
     ) {
-        TicketFlightID entityId = createId(id, no);
+        TicketFlightID entityId = createId(no, id);
         log.info("Handling request to delete the ticket flight entity with id:{}", entityId);
         Optional<TicketFlight> found = crudService.findById(entityId);
         if (found.isPresent()) {
@@ -183,28 +197,30 @@ public class TicketFlightsController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteAll(@RequestBody List<TicketFlightDto> TicketFlightDtos) {
-        Set<TicketFlightID> ids = new HashSet<>();
-        for (TicketFlightDto dto : TicketFlightDtos) {
-            ids.add(createId(dto.getTicketNo(), dto.getFlightId()));
-        }
-
-        log.info("Handling request to delete all size:{} ticket flight entities", ids.size());
-        List<TicketFlight> found = crudService.findAllById(ids);
-        if (found.size() != ids.size()) {
+    public ResponseEntity<?> deleteAll(
+            @PathVariable("no") String no,
+            @RequestBody List<Integer> ids
+    ) {
+        List<TicketFlightID> ticketFlightIds = ids
+                .stream()
+                .map(id -> createId(no, id))
+                .collect(Collectors.toList());
+        log.info("Handling request to delete all size:{} ticket flight entities", ticketFlightIds.size());
+        List<TicketFlight> found = crudService.findAllById(ticketFlightIds);
+        if (found.size() != ticketFlightIds.size()) {
             found.stream()
                     .map(TicketFlight::getId)
-                    .forEach(ids::remove);
-            log.warn("No ticket flight entities with ids:{} found", ids);
+                    .forEach(ticketFlightIds::remove);
+            log.warn("No ticket flight entities with ids:{} found", ticketFlightIds);
             return new ResponseEntity<>(
-                    String.format("No ticket flight entities with ids:%s found", ids),
+                    String.format("No ticket flight entities with ids:%s found", ticketFlightIds),
                     HttpStatus.NOT_FOUND
             );
         }
 
-        log.info("Deleting all ticket flight entities with body size:{}", ids.size());
-        crudService.deleteAll(ids);
-        log.info("Success deleting all ticket flight entities with body size:{}", ids.size());
+        log.info("Deleting all ticket flight entities with body size:{}", ticketFlightIds.size());
+        crudService.deleteAll(ticketFlightIds);
+        log.info("Success deleting all ticket flight entities with body size:{}", ticketFlightIds.size());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
