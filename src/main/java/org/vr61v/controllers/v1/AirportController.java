@@ -17,13 +17,13 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/airports")
-public class AirportCrudController {
+public class AirportController {
 
     private final AirportCrudService airportCrudService;
 
     private final AirportMapper mapper;
 
-    public AirportCrudController(
+    public AirportController(
             AirportCrudService airportCrudService,
             AirportMapper airportMapper
     ) {

@@ -1,4 +1,4 @@
-package org.vr61v.dtos;
+package org.vr61v.dtos.boardingPass;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class BoardingPassDto {
+public class BoardingPassResponseDto {
 
     @Size(min = 13, max = 13)
     private String ticketNo;
@@ -21,4 +21,3 @@ public class BoardingPassDto {
     private String seatNo;
 
 }
-
