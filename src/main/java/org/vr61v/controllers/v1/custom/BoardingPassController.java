@@ -20,7 +20,7 @@ import java.util.*;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/boardingpass")
+@RequestMapping("api/v1/tickets/{no}/flights/{id}/boarding-pass")
 public class BoardingPassController {
 
     private final BoardingPassCrudService boardingPassCrudService;
@@ -43,9 +43,9 @@ public class BoardingPassController {
         this.mapper = boardingPassMapper;
     }
 
-    private TicketFlightID createId(String id, Integer no) {
-        Optional<Ticket> ticket = ticketCrudService.findById(id);
-        Optional<Flight> flight = flightCrudService.findById(no);
+    private TicketFlightID createId(String no, Integer id) {
+        Optional<Ticket> ticket = ticketCrudService.findById(no);
+        Optional<Flight> flight = flightCrudService.findById(id);
         if (ticket.isEmpty() || flight.isEmpty()) {
             throw new IllegalArgumentException("ticket or flight not found");
         }
@@ -55,31 +55,20 @@ public class BoardingPassController {
                 .build();
     }
 
-    private BoardingPass getRequestEntity(String id, Integer no, BoardingPassDto body) {
+    private BoardingPass getRequestEntity(String no, Integer id, BoardingPassDto body) {
         BoardingPass entity = mapper.toEntity(body);
-        entity.setId(createId(id, no));
+        entity.setId(createId(no, id));
         return entity;
     }
 
-    private List<BoardingPass> getRequestEntityList(List<BoardingPassDto> body) {
-        List<BoardingPass> entities = new ArrayList<>();
-        for (BoardingPassDto dto : body) {
-            BoardingPass entity = mapper.toEntity(dto);
-            entity.setId(createId(dto.getTicketNo(), dto.getFlightId()));
-            entities.add(entity);
-        }
-
-        return entities;
-    }
-
-    @PostMapping("/{id}/{no}")
+    @PostMapping
     public ResponseEntity<?> create(
-            @PathVariable String id,
-            @PathVariable("no") Integer no,
+            @PathVariable("no") String no,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody BoardingPassDto body
     ) {
-        log.info("Handling request to create a new boarding pass entity with id:{}, no:{}", id, no);
-        BoardingPass entity = getRequestEntity(id, no, body);
+        log.info("Handling request to create a new boarding pass entity with no:{}, id:{}", no, id);
+        BoardingPass entity = getRequestEntity(no, id, body);
         log.info("Creating a new boarding pass entity with id:{}, body:{}", id, body);
         BoardingPass created = boardingPassCrudService.create(entity);
         BoardingPassDto dto = mapper.toDto(created);
@@ -87,24 +76,14 @@ public class BoardingPassController {
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
-    @PostMapping
-    public ResponseEntity<?> createAll(@Valid @RequestBody List<BoardingPassDto> body) {
-        log.info("Handling request to create all size:{} boarding pass entities", body.size());
-        List<BoardingPass> entities = getRequestEntityList(body);
-        List<BoardingPass> created = boardingPassCrudService.createAll(entities);
-        List<BoardingPassDto> dtos = created.stream().map(mapper::toDto).toList();
-        log.info("Success creating all new boarding pass entities with dto size:{}", dtos.size());
-        return new ResponseEntity<>(dtos, HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}/{no}")
+    @PutMapping
     public ResponseEntity<?> update(
-            @PathVariable String id,
-            @PathVariable("no") Integer no,
+            @PathVariable("no") String no,
+            @PathVariable("id") Integer id,
             @Valid @RequestBody BoardingPassDto body
     ) {
         log.info("Handling request to update the boarding pass entity with id:{}", id);
-        BoardingPass entity = getRequestEntity(id, no, body);
+        BoardingPass entity = getRequestEntity(no, id, body);
         log.info("Updating the boarding pass entity with id:{}, body:{}", id, body);
         BoardingPass updated = boardingPassCrudService.update(entity);
         BoardingPassDto dto = mapper.toDto(updated);
@@ -112,60 +91,33 @@ public class BoardingPassController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateAll(@Valid @RequestBody List<BoardingPassDto> body) {
-        log.info("Handling request to update all size:{} boarding pass entities", body.size());
-        List<BoardingPass> entities = getRequestEntityList(body);
-        List<BoardingPass> updated = boardingPassCrudService.updateAll(entities);
-        List<BoardingPassDto> dtos = updated.stream().map(mapper::toDto).toList();
-        log.info("Success updating all boarding pass entities with dto size:{}", dtos.size());
-        return new ResponseEntity<>(dtos, HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}/{no}")
+    @GetMapping
     public ResponseEntity<?> findById(
-            @PathVariable("id") String id,
-            @PathVariable("no") Integer no
+            @PathVariable("no") String no,
+            @PathVariable("id") Integer id
     ) {
         log.info("Handling request to find the boarding pass entity with id:{}", id);
-        TicketFlightID entityId = createId(id, no);
+        TicketFlightID entityId = createId(no, id);
         Optional<BoardingPass> found = boardingPassCrudService.findById(entityId);
         if (found.isPresent()) {
             BoardingPassDto dto = mapper.toDto(found.get());
             log.info("Success finding the boarding pass entity with id:{}, dto:{}", id, dto);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } else {
-            log.warn("No boarding pass entity with id:{} found", entityId);
+            log.warn("No boarding pass entity with no:{} id:{} found", no, id);
             return new ResponseEntity<>(
-                    String.format("No boarding pass entity with id:%s found", entityId),
+                    String.format("No boarding pass entity with no:%s id:%s found", no, id),
                     HttpStatus.NOT_FOUND
             );
         }
     }
 
-    @GetMapping
-    public ResponseEntity<?> findAll() {
-        log.info("Handling request to find all boarding pass entities");
-        List<BoardingPass> found = boardingPassCrudService.findAll();
-        List<BoardingPassDto> dtos = found.stream().map(mapper::toDto).toList();
-        if (!dtos.isEmpty()) {
-            log.info("Success finding all boarding pass entities with dto size:{}", dtos.size());
-            return new ResponseEntity<>(dtos, HttpStatus.OK);
-        } else {
-            log.warn("No boarding pass entity found");
-            return new ResponseEntity<>(
-                    "No boarding pass entity found",
-                    HttpStatus.NOT_FOUND
-            );
-        }
-    }
-
-    @DeleteMapping("/{id}/{no}")
+    @DeleteMapping
     public ResponseEntity<?> delete(
-            @PathVariable("id") String id,
-            @PathVariable("no") Integer no
+            @PathVariable("no") String no,
+            @PathVariable("id") Integer id
     ) {
-        TicketFlightID entityId = createId(id, no);
+        TicketFlightID entityId = createId(no, id);
         log.info("Handling request to delete the boarding pass entity with id:{}", entityId);
         Optional<BoardingPass> found = boardingPassCrudService.findById(entityId);
         if (found.isPresent()) {
@@ -174,37 +126,11 @@ public class BoardingPassController {
             log.info("Success deleting the boarding pass entity with id:{}", entityId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            log.warn("No boarding pass entity with id:{} found", entityId);
+            log.warn("No boarding pass entity with no:{} id:{} found", no, id);
             return new ResponseEntity<>(
-                    String.format("No boarding pass entity with id:%s found", entityId),
+                    String.format("No boarding pass entity with no:%s id:%s found", no, id),
                     HttpStatus.NOT_FOUND
             );
         }
-    }
-
-    @DeleteMapping
-    public ResponseEntity<?> deleteAll(@RequestBody List<BoardingPassDto> boardingPassDtos) {
-        log.info("Handling request to delete all size:{} boarding pass entities", boardingPassDtos.size());
-        Set<TicketFlightID> ids = new HashSet<>();
-        for (BoardingPassDto dto : boardingPassDtos) {
-            ids.add(createId(dto.getTicketNo(), dto.getFlightId()));
-        }
-
-        List<BoardingPass> found = boardingPassCrudService.findAllById(ids);
-        if (found.size() != ids.size()) {
-            found.stream()
-                    .map(BoardingPass::getId)
-                    .forEach(ids::remove);
-            log.warn("No boarding pass entities with ids:{} found", ids);
-            return new ResponseEntity<>(
-                    String.format("No boarding pass entities with ids:%s found", ids),
-                    HttpStatus.NOT_FOUND
-            );
-        }
-
-        log.info("Deleting all boarding pass entities with body size:{}", ids.size());
-        boardingPassCrudService.deleteAll(ids);
-        log.info("Success deleting all boarding pass entities with body size:{}", ids.size());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
