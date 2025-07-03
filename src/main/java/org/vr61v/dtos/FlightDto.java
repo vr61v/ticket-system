@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.vr61v.dtos.aircraft.AircraftResponseDto;
 import org.vr61v.types.FlightStatus;
 
 import java.time.OffsetDateTime;
@@ -22,7 +23,7 @@ public class FlightDto {
     private FlightStatus status;
 
     @NotNull @Valid
-    private AircraftDto aircraft;
+    private AircraftResponseDto aircraft;
 
     @NotNull @Valid
     private AirportDto departureAirport;

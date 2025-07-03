@@ -149,9 +149,9 @@ public class SeatController {
     }
 
     @GetMapping
-    public ResponseEntity<?> findAll(@PathVariable String code) {
+    public ResponseEntity<?> findAll(@PathVariable("code") String code) {
         log.info("Handling request to find all seat entities");
-        List<Seat> found = crudService.findAll();
+        List<Seat> found = seatCustomService.findSeatsByAircraftCode(code);
         List<SeatDto> dtos = found.stream().map(mapper::toDto).toList();
         if (!dtos.isEmpty()) {
             log.info("Success finding all seat entities with dto size:{}", dtos.size());
