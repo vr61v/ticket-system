@@ -1,4 +1,4 @@
-package org.vr61v.dtos;
+package org.vr61v.dtos.seat;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -6,7 +6,7 @@ import lombok.Data;
 import org.vr61v.types.FareCondition;
 
 @Data
-public class SeatDto {
+public class SeatResponseDto {
 
     @Size(min = 3, max = 3)
     private String aircraftCode;

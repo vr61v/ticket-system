@@ -22,7 +22,6 @@ public interface AircraftMapper {
 
     Aircraft toEntity(AircraftRequestDto dto);
 
-
     @AfterMapping
     default void setLocale(
             @MappingTarget AircraftResponseLocalizedDto dto,
@@ -35,4 +34,5 @@ public interface AircraftMapper {
             dto.setModel(entity.getModel().getRu());
         }
     }
+
 }

@@ -67,6 +67,7 @@ public class AircraftController {
                     mapper.toLocalizedDto(found.get(), locale);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         }
+
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -79,6 +80,7 @@ public class AircraftController {
                     HttpStatus.OK
             );
         }
+
         return new ResponseEntity<>(
                 found.stream().map(e -> mapper.toLocalizedDto(e, locale)).toList(),
                 HttpStatus.OK
@@ -92,6 +94,7 @@ public class AircraftController {
             aircraftCrudService.deleteById(code);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
