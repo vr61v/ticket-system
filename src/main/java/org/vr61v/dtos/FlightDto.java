@@ -26,10 +26,10 @@ public class FlightDto {
     private AircraftResponseDto aircraft;
 
     @NotNull @Valid
-    private AirportDto departureAirport;
+    private AircraftResponseDto departureAirport;
 
     @NotNull @Valid
-    private AirportDto arrivalAirport;
+    private AircraftResponseDto arrivalAirport;
 
     @NotNull
     private OffsetDateTime scheduledDeparture;

@@ -1,20 +1,16 @@
-package org.vr61v.dtos;
+package org.vr61v.dtos.airport;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.vr61v.embedded.LocalizedString;
 
 @Data
-public class AirportDto {
-
-    @Size(min = 3, max = 3)
-    private String airportCode;
+public class AirportRequestDto {
 
     @NotNull @Valid
-    private LocalizedString airportName;
+    private LocalizedString name;
 
     @NotNull @Valid
     private LocalizedString city;
