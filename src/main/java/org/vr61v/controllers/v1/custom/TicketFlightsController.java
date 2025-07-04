@@ -12,10 +12,9 @@ import org.vr61v.entities.Flight;
 import org.vr61v.entities.Ticket;
 import org.vr61v.entities.TicketFlight;
 import org.vr61v.mappers.TicketFlightMapper;
-import org.vr61v.services.crud.FlightCrudService;
-import org.vr61v.services.crud.TicketCrudService;
-import org.vr61v.services.crud.TicketFlightCrudService;
-import org.vr61v.services.custom.TicketFlightCustomService;
+import org.vr61v.services.impl.FlightService;
+import org.vr61v.services.impl.TicketService;
+import org.vr61v.services.impl.TicketFlightService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,33 +26,29 @@ import java.util.stream.Collectors;
 @RequestMapping("api/v1/tickets/{no}/flights")
 public class TicketFlightsController {
 
-    private final TicketFlightCrudService crudService;
+    private final TicketFlightService crudService;
 
-    private final TicketFlightCustomService customService;
+    private final TicketService ticketService;
 
-    private final TicketCrudService ticketCrudService;
-
-    private final FlightCrudService flightCrudService;
+    private final FlightService flightService;
 
     private final TicketFlightMapper mapper;
 
     public TicketFlightsController(
-            TicketFlightCrudService ticketFlightCrudService,
-            TicketFlightCustomService customService,
-            TicketCrudService ticketCrudService,
-            FlightCrudService flightCrudService,
+            TicketFlightService ticketFlightService,
+            TicketService ticketService,
+            FlightService flightService,
             TicketFlightMapper ticketFlightMapper
     ) {
-        this.crudService = ticketFlightCrudService;
-        this.customService = customService;
-        this.ticketCrudService = ticketCrudService;
-        this.flightCrudService = flightCrudService;
+        this.crudService = ticketFlightService;
+        this.ticketService = ticketService;
+        this.flightService = flightService;
         this.mapper = ticketFlightMapper;
     }
 
     private TicketFlightID createId(String no, Integer id) {
-        Optional<Ticket> ticket = ticketCrudService.findById(no);
-        Optional<Flight> flight = flightCrudService.findById(id);
+        Optional<Ticket> ticket = ticketService.findById(no);
+        Optional<Flight> flight = flightService.findById(id);
         if (ticket.isEmpty() || flight.isEmpty()) {
             throw new IllegalArgumentException("ticket or flight not found");
         }
@@ -160,7 +155,7 @@ public class TicketFlightsController {
     @GetMapping
     public ResponseEntity<?> findAll(@PathVariable("no") String ticketNo) {
         log.info("Handling request to find all ticket flight entities");
-        List<TicketFlight> found = customService.findTicketFlightsByTicketNo(ticketNo);
+        List<TicketFlight> found = crudService.findTicketFlightsByTicketNo(ticketNo);
         List<TicketFlightDto> dtos = found.stream().map(mapper::toDto).toList();
         if (!dtos.isEmpty()) {
             log.info("Success finding all ticket flight entities with no:{} dto size:{}", ticketNo, dtos.size());

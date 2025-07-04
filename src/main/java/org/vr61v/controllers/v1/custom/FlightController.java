@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.vr61v.dtos.FlightDto;
 import org.vr61v.entities.Flight;
 import org.vr61v.mappers.FlightMapper;
-import org.vr61v.services.crud.FlightCrudService;
+import org.vr61v.services.impl.FlightService;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,15 +18,15 @@ import java.util.Optional;
 @RequestMapping("api/v1/flights")
 public class FlightController {
 
-    private final FlightCrudService crudService;
+    private final FlightService crudService;
 
     private final FlightMapper mapper;
 
     public FlightController(
-            FlightCrudService flightCrudService,
+            FlightService flightService,
             FlightMapper flightMapper
     ) {
-        this.crudService = flightCrudService;
+        this.crudService = flightService;
         this.mapper = flightMapper;
     }
 

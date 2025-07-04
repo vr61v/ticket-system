@@ -8,7 +8,7 @@ import org.vr61v.dtos.airport.AirportRequestDto;
 import org.vr61v.dtos.airport.AirportResponseDto;
 import org.vr61v.entities.Airport;
 import org.vr61v.mappers.AirportMapper;
-import org.vr61v.services.crud.AirportCrudService;
+import org.vr61v.services.impl.AirportService;
 import org.vr61v.types.Locale;
 
 import java.util.List;
@@ -19,15 +19,15 @@ import java.util.Set;
 @RequestMapping("/api/v1/airports")
 public class AirportController {
 
-    private final AirportCrudService airportCrudService;
+    private final AirportService airportService;
 
     private final AirportMapper mapper;
 
     public AirportController(
-            AirportCrudService airportCrudService,
+            AirportService airportService,
             AirportMapper airportMapper
     ) {
-        this.airportCrudService = airportCrudService;
+        this.airportService = airportService;
         this.mapper = airportMapper;
     }
 
@@ -38,7 +38,7 @@ public class AirportController {
     ) {
         Airport entity = mapper.toEntity(request);
         entity.setAirportCode(code);
-        Airport created = airportCrudService.create(entity);
+        Airport created = airportService.create(entity);
         AirportResponseDto dto = mapper.toDto(created);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
@@ -50,7 +50,7 @@ public class AirportController {
     ) {
         Airport entity = mapper.toEntity(request);
         entity.setAirportCode(code);
-        Airport updated = airportCrudService.update(entity);
+        Airport updated = airportService.update(entity);
         AirportResponseDto dto = mapper.toDto(updated);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -60,7 +60,7 @@ public class AirportController {
             @PathVariable("code") String code,
             @RequestParam(value = "locale", required = false) Locale locale
     ) {
-        Optional<Airport> found = airportCrudService.findById(code);
+        Optional<Airport> found = airportService.findById(code);
         if (found.isPresent()) {
             var dto = locale == null ?
                     mapper.toDto(found.get()) :
@@ -75,7 +75,7 @@ public class AirportController {
     public ResponseEntity<?> findAll(
             @RequestParam(value = "locale", required = false) Locale locale
     ) {
-        List<Airport> found = airportCrudService.findAll();
+        List<Airport> found = airportService.findAll();
         if (locale == null) {
             return new ResponseEntity<>(
                     found.stream().map(mapper::toDto).toList(),
@@ -91,30 +91,13 @@ public class AirportController {
 
     @DeleteMapping("/{code}")
     public ResponseEntity<?> delete(@PathVariable("code") String code) {
-        Optional<Airport> found = airportCrudService.findById(code);
+        Optional<Airport> found = airportService.findById(code);
         if (found.isPresent()) {
-            airportCrudService.deleteById(code);
+            airportService.deleteById(code);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @DeleteMapping
-    public ResponseEntity<?> deleteAll(@RequestBody Set<String> ids) {
-        List<Airport> found = airportCrudService.findAllById(ids);
-        if (found.size() != ids.size()) {
-            found.stream()
-                    .map(Airport::getAirportCode)
-                    .forEach(ids::remove);
-            return new ResponseEntity<>(
-                    String.format("No airports with ids:%s found", ids),
-                    HttpStatus.NOT_FOUND
-            );
-        }
-
-        airportCrudService.deleteAll(ids);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

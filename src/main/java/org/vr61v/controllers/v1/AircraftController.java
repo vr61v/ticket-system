@@ -8,7 +8,7 @@ import org.vr61v.dtos.aircraft.AircraftRequestDto;
 import org.vr61v.dtos.aircraft.AircraftResponseDto;
 import org.vr61v.entities.Aircraft;
 import org.vr61v.mappers.AircraftMapper;
-import org.vr61v.services.crud.AircraftCrudService;
+import org.vr61v.services.impl.AircraftService;
 import org.vr61v.types.Locale;
 
 import java.util.List;
@@ -19,15 +19,15 @@ import java.util.Set;
 @RequestMapping("/api/v1/aircrafts")
 public class AircraftController {
 
-    private final AircraftCrudService aircraftCrudService;
+    private final AircraftService aircraftService;
 
     private final AircraftMapper mapper;
 
     public AircraftController(
-            AircraftCrudService aircraftCrudService,
+            AircraftService aircraftService,
             AircraftMapper aircraftMapper
     ) {
-        this.aircraftCrudService = aircraftCrudService;
+        this.aircraftService = aircraftService;
         this.mapper = aircraftMapper;
     }
 
@@ -38,7 +38,7 @@ public class AircraftController {
     ) {
         Aircraft entity = mapper.toEntity(request);
         entity.setAircraftCode(code);
-        Aircraft created = aircraftCrudService.create(entity);
+        Aircraft created = aircraftService.create(entity);
         AircraftResponseDto dto = mapper.toDto(created);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
@@ -50,7 +50,7 @@ public class AircraftController {
     ) {
         Aircraft entity = mapper.toEntity(request);
         entity.setAircraftCode(code);
-        Aircraft updated = aircraftCrudService.update(entity);
+        Aircraft updated = aircraftService.update(entity);
         AircraftResponseDto dto = mapper.toDto(updated);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -60,7 +60,7 @@ public class AircraftController {
             @PathVariable("code") String code,
             @RequestParam(value = "locale", required = false) Locale locale
     ) {
-        Optional<Aircraft> found = aircraftCrudService.findById(code);
+        Optional<Aircraft> found = aircraftService.findById(code);
         if (found.isPresent()) {
             var dto = locale == null ?
                     mapper.toDto(found.get()) :
@@ -75,7 +75,7 @@ public class AircraftController {
     public ResponseEntity<?> findAll(
             @RequestParam(value = "locale", required = false) Locale locale
     ) {
-        List<Aircraft> found = aircraftCrudService.findAll();
+        List<Aircraft> found = aircraftService.findAll();
         if (locale == null) {
             return new ResponseEntity<>(
                     found.stream().map(mapper::toDto).toList(),
@@ -91,29 +91,13 @@ public class AircraftController {
 
     @DeleteMapping("/{code}")
     public ResponseEntity<?> delete(@PathVariable("code") String code) {
-        Optional<Aircraft> found = aircraftCrudService.findById(code);
+        Optional<Aircraft> found = aircraftService.findById(code);
         if (found.isPresent()) {
-            aircraftCrudService.deleteById(code);
+            aircraftService.deleteById(code);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteAll(@RequestBody Set<String> ids) {
-        List<Aircraft> found = aircraftCrudService.findAllById(ids);
-        if (found.size() != ids.size()) {
-            found.stream()
-                    .map(Aircraft::getAircraftCode)
-                    .forEach(ids::remove);
-            return new ResponseEntity<>(
-                    String.format("No aircrafts with ids:%s found", ids),
-                    HttpStatus.NOT_FOUND
-            );
-        }
-
-        aircraftCrudService.deleteAll(ids);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
 }

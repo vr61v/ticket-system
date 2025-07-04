@@ -6,17 +6,17 @@ import org.vr61v.controllers.v1.CrudController;
 import org.vr61v.dtos.TicketDto;
 import org.vr61v.entities.Ticket;
 import org.vr61v.mappers.TicketMapper;
-import org.vr61v.services.crud.TicketCrudService;
+import org.vr61v.services.impl.TicketService;
 
 @RestController
 @RequestMapping("api/v1/tickets")
 public class TicketCrudController extends CrudController<Ticket, TicketDto, String> {
 
     public TicketCrudController(
-            TicketCrudService ticketCrudService,
+            TicketService ticketService,
             TicketMapper ticketMapper
     ) {
-        super(ticketCrudService, ticketMapper, "ticket");
+        super(ticketService, ticketMapper, "ticket");
     }
 
     @Override

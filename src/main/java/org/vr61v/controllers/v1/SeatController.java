@@ -11,9 +11,8 @@ import org.vr61v.embedded.SeatID;
 import org.vr61v.entities.Aircraft;
 import org.vr61v.entities.Seat;
 import org.vr61v.mappers.SeatMapper;
-import org.vr61v.services.crud.AircraftCrudService;
-import org.vr61v.services.crud.SeatCrudService;
-import org.vr61v.services.custom.SeatCustomService;
+import org.vr61v.services.impl.AircraftService;
+import org.vr61v.services.impl.SeatService;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,28 +22,24 @@ import java.util.Optional;
 @RequestMapping("api/v1/aircrafts/{code}/seats")
 public class SeatController {
 
-    private final SeatCrudService seatCrudService;
+    private final SeatService seatService;
 
-    private final SeatCustomService seatCustomService;
-
-    private final AircraftCrudService aircraftCrudService;
+    private final AircraftService aircraftService;
 
     private final SeatMapper mapper;
 
     public SeatController(
-            SeatCrudService seatCrudService,
-            SeatCustomService seatCustomService,
-            AircraftCrudService aircraftCrudService,
+            SeatService seatService,
+            AircraftService aircraftService,
             SeatMapper seatMapper
     ) {
-        this.seatCrudService = seatCrudService;
-        this.seatCustomService = seatCustomService;
-        this.aircraftCrudService = aircraftCrudService;
+        this.seatService = seatService;
+        this.aircraftService = aircraftService;
         this.mapper = seatMapper;
     }
 
     private SeatID buildSeatID(String aircraftCode, String ticketNo) {
-        Optional<Aircraft> aircraft = aircraftCrudService.findById(aircraftCode);
+        Optional<Aircraft> aircraft = aircraftService.findById(aircraftCode);
         if (aircraft.isEmpty()) {
             throw new IllegalArgumentException("aircraft not found");
         }
@@ -68,7 +63,7 @@ public class SeatController {
             @Valid @RequestBody SeatRequestDto request
     ) {
         Seat entity = buildEntity(aircraftCode, ticketNo, request);
-        Seat created = seatCrudService.create(entity);
+        Seat created = seatService.create(entity);
         SeatResponseDto dto = mapper.toDto(created);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
@@ -80,7 +75,7 @@ public class SeatController {
             @Valid @RequestBody SeatRequestDto request
     ) {
         Seat entity = buildEntity(aircraftCode, ticketNo, request);
-        Seat updated = seatCrudService.update(entity);
+        Seat updated = seatService.update(entity);
         SeatResponseDto dto = mapper.toDto(updated);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -91,7 +86,7 @@ public class SeatController {
             @PathVariable("no") String ticketNo
     ) {
         SeatID entityId = buildSeatID(aircraftCode, ticketNo);
-        Optional<Seat> found = seatCrudService.findById(entityId);
+        Optional<Seat> found = seatService.findById(entityId);
         if (found.isPresent()) {
             SeatResponseDto dto = mapper.toDto(found.get());
             return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -102,7 +97,7 @@ public class SeatController {
 
     @GetMapping
     public ResponseEntity<?> findAll(@PathVariable("code") String aircraftCode) {
-        List<Seat> found = seatCustomService.findSeatsByAircraftCode(aircraftCode);
+        List<Seat> found = seatService.findSeatsByAircraftCode(aircraftCode);
         List<SeatResponseDto> dtos = found.stream().map(mapper::toDto).toList();
         if (!dtos.isEmpty()) {
             return new ResponseEntity<>(dtos, HttpStatus.OK);
@@ -117,9 +112,9 @@ public class SeatController {
             @PathVariable("no") String ticketNo
     ) {
         SeatID entityId = buildSeatID(aircraftCode, ticketNo);
-        Optional<Seat> found = seatCrudService.findById(entityId);
+        Optional<Seat> found = seatService.findById(entityId);
         if (found.isPresent()) {
-            seatCrudService.deleteById(entityId);
+            seatService.deleteById(entityId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -128,9 +123,9 @@ public class SeatController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteAll(@PathVariable("code") String aircraftCode) {
-        Optional<Aircraft> found = aircraftCrudService.findById(aircraftCode);
+        Optional<Aircraft> found = aircraftService.findById(aircraftCode);
         if (found.isPresent()) {
-            seatCustomService.deleteSeatsByAircraftCode(aircraftCode);
+            seatService.deleteSeatsByAircraftCode(aircraftCode);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 

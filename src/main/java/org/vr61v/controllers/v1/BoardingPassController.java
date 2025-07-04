@@ -13,9 +13,9 @@ import org.vr61v.entities.BoardingPass;
 import org.vr61v.entities.Flight;
 import org.vr61v.entities.Ticket;
 import org.vr61v.mappers.BoardingPassMapper;
-import org.vr61v.services.crud.BoardingPassCrudService;
-import org.vr61v.services.crud.FlightCrudService;
-import org.vr61v.services.crud.TicketCrudService;
+import org.vr61v.services.impl.BoardingPassService;
+import org.vr61v.services.impl.FlightService;
+import org.vr61v.services.impl.TicketService;
 
 import java.util.Optional;
 
@@ -24,29 +24,29 @@ import java.util.Optional;
 @RequestMapping("api/v1/tickets/{no}/flights/{id}/boarding-pass")
 public class BoardingPassController {
 
-    private final BoardingPassCrudService boardingPassCrudService;
+    private final BoardingPassService boardingPassService;
 
-    private final TicketCrudService ticketCrudService;
+    private final TicketService ticketService;
 
-    private final FlightCrudService flightCrudService;
+    private final FlightService flightService;
 
     private final BoardingPassMapper mapper;
 
     public BoardingPassController(
-            BoardingPassCrudService boardingPassCrudService,
-            TicketCrudService ticketCrudService,
-            FlightCrudService flightCrudService,
+            BoardingPassService boardingPassService,
+            TicketService ticketService,
+            FlightService flightService,
             BoardingPassMapper boardingPassMapper
     ) {
-        this.boardingPassCrudService = boardingPassCrudService;
-        this.ticketCrudService = ticketCrudService;
-        this.flightCrudService = flightCrudService;
+        this.boardingPassService = boardingPassService;
+        this.ticketService = ticketService;
+        this.flightService = flightService;
         this.mapper = boardingPassMapper;
     }
 
     private TicketFlightID buildTicketFlightID(String ticketNo, Integer flightNo) {
-        Optional<Ticket> ticket = ticketCrudService.findById(ticketNo);
-        Optional<Flight> flight = flightCrudService.findById(flightNo);
+        Optional<Ticket> ticket = ticketService.findById(ticketNo);
+        Optional<Flight> flight = flightService.findById(flightNo);
         if (ticket.isEmpty() || flight.isEmpty()) {
             throw new IllegalArgumentException("ticket or flight not found");
         }
@@ -69,7 +69,7 @@ public class BoardingPassController {
             @Valid @RequestBody BoardingPassRequestDto request
     ) {
         BoardingPass entity = buildEntity(ticketNo, flightId, request);
-        BoardingPass created = boardingPassCrudService.create(entity);
+        BoardingPass created = boardingPassService.create(entity);
         BoardingPassResponseDto dto = mapper.toDto(created);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
@@ -81,7 +81,7 @@ public class BoardingPassController {
             @Valid @RequestBody BoardingPassRequestDto request
     ) {
         BoardingPass entity = buildEntity(ticketNo, flightId, request);
-        BoardingPass updated = boardingPassCrudService.update(entity);
+        BoardingPass updated = boardingPassService.update(entity);
         BoardingPassResponseDto dto = mapper.toDto(updated);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -92,7 +92,7 @@ public class BoardingPassController {
             @PathVariable("id") Integer flightId
     ) {
         TicketFlightID entityId = buildTicketFlightID(ticketNo, flightId);
-        Optional<BoardingPass> found = boardingPassCrudService.findById(entityId);
+        Optional<BoardingPass> found = boardingPassService.findById(entityId);
         if (found.isPresent()) {
             BoardingPassResponseDto dto = mapper.toDto(found.get());
             return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -107,9 +107,9 @@ public class BoardingPassController {
             @PathVariable("id") Integer flightId
     ) {
         TicketFlightID entityId = buildTicketFlightID(ticketNo, flightId);
-        Optional<BoardingPass> found = boardingPassCrudService.findById(entityId);
+        Optional<BoardingPass> found = boardingPassService.findById(entityId);
         if (found.isPresent()) {
-            boardingPassCrudService.deleteById(entityId);
+            boardingPassService.deleteById(entityId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 

@@ -1,19 +1,20 @@
-package org.vr61v.services.custom;
+package org.vr61v.services.impl;
 
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.vr61v.embedded.TicketFlightID;
 import org.vr61v.entities.TicketFlight;
 import org.vr61v.repositories.TicketFlightRepository;
+import org.vr61v.services.CrudService;
 
 import java.util.List;
 
 @Service
-@Transactional
-public class TicketFlightCustomService {
+public class TicketFlightService extends CrudService<TicketFlight, TicketFlightID> {
 
     private final TicketFlightRepository ticketFlightRepository;
 
-    public TicketFlightCustomService(TicketFlightRepository ticketFlightRepository) {
+    public TicketFlightService(TicketFlightRepository repository, TicketFlightRepository ticketFlightRepository) {
+        super(repository);
         this.ticketFlightRepository = ticketFlightRepository;
     }
 
