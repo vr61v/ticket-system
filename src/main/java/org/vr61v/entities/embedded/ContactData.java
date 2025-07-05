@@ -1,4 +1,4 @@
-package org.vr61v.embedded;
+package org.vr61v.entities.embedded;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Email;

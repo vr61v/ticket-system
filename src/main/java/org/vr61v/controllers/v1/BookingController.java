@@ -84,7 +84,7 @@ public class BookingController {
     public ResponseEntity<?> delete(@PathVariable("ref") String ref) {
         Optional<Booking> found = bookingService.findById(ref);
         if (found.isPresent()) {
-            bookingService.deleteById(ref);
+            bookingService.delete(ref);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 

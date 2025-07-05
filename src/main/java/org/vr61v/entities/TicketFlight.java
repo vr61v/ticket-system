@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.vr61v.embedded.TicketFlightID;
+import org.vr61v.entities.embedded.TicketFlightID;
 import org.vr61v.types.FareCondition;
 
 @Data

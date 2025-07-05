@@ -2,47 +2,46 @@ package org.vr61v.controllers.v1;
 
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
-import org.vr61v.dtos.boardingPass.BoardingPassRequestDto;
-import org.vr61v.dtos.boardingPass.BoardingPassResponseDto;
+import org.vr61v.dtos.ticketFlight.TicketFlightRequestDto;
+import org.vr61v.dtos.ticketFlight.TicketFlightResponseDto;
 import org.vr61v.entities.embedded.TicketFlightID;
-import org.vr61v.entities.BoardingPass;
 import org.vr61v.entities.Flight;
 import org.vr61v.entities.Ticket;
-import org.vr61v.mappers.BoardingPassMapper;
-import org.vr61v.services.impl.BoardingPassService;
+import org.vr61v.entities.TicketFlight;
+import org.vr61v.mappers.TicketFlightMapper;
 import org.vr61v.services.impl.FlightService;
+import org.vr61v.services.impl.TicketFlightService;
 import org.vr61v.services.impl.TicketService;
 
+import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @RestController
-@RequestMapping("api/v1/tickets/{no}/flights/{id}/boarding-pass")
-public class BoardingPassController {
-
-    private final BoardingPassService boardingPassService;
+@RequestMapping("api/v1/tickets/{no}/flights")
+public class TicketFlightsController {
 
     private final TicketService ticketService;
 
     private final FlightService flightService;
 
-    private final BoardingPassMapper mapper;
+    private final TicketFlightService ticketFlightService;
 
-    public BoardingPassController(
-            BoardingPassService boardingPassService,
+    private final TicketFlightMapper mapper;
+
+    public TicketFlightsController(
             TicketService ticketService,
             FlightService flightService,
-            BoardingPassMapper boardingPassMapper
+            TicketFlightService ticketFlightService,
+            TicketFlightMapper ticketFlightMapper
     ) {
-        this.boardingPassService = boardingPassService;
         this.ticketService = ticketService;
         this.flightService = flightService;
-        this.mapper = boardingPassMapper;
+        this.ticketFlightService = ticketFlightService;
+        this.mapper = ticketFlightMapper;
     }
 
     private TicketFlightID buildTicketFlightID(String ticketNo, Integer flightNo) {
@@ -57,63 +56,74 @@ public class BoardingPassController {
                 .build();
     }
 
-    private BoardingPass buildEntity(String ticketNo, Integer flightId, BoardingPassRequestDto body) {
-        BoardingPass entity = mapper.toEntity(body);
+    private TicketFlight buildEntity(String ticketNo, Integer flightId, TicketFlightRequestDto request) {
+        TicketFlight entity = mapper.toEntity(request);
         entity.setId(buildTicketFlightID(ticketNo, flightId));
         return entity;
     }
 
-    @PostMapping
+
+    @PostMapping("{id}")
     public ResponseEntity<?> create(
             @PathVariable("no") String ticketNo,
             @PathVariable("id") Integer flightId,
-            @Valid @RequestBody BoardingPassRequestDto request
+            @Valid @RequestBody TicketFlightRequestDto request
     ) {
-        BoardingPass entity = buildEntity(ticketNo, flightId, request);
-        BoardingPass created = boardingPassService.create(entity);
-        BoardingPassResponseDto dto = mapper.toDto(created);
+        TicketFlight entity = buildEntity(ticketNo, flightId, request);
+        TicketFlight created = ticketFlightService.create(entity);
+        TicketFlightResponseDto dto = mapper.toDto(created);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
-    @PutMapping
+    @PutMapping("{id}")
     public ResponseEntity<?> update(
             @PathVariable("no") String ticketNo,
             @PathVariable("id") Integer flightId,
-            @Valid @RequestBody BoardingPassRequestDto request
+            @Valid @RequestBody TicketFlightRequestDto request
     ) {
-        BoardingPass entity = buildEntity(ticketNo, flightId, request);
-        BoardingPass updated = boardingPassService.update(entity);
-        BoardingPassResponseDto dto = mapper.toDto(updated);
+        TicketFlight entity = buildEntity(ticketNo, flightId, request);
+        TicketFlight updated = ticketFlightService.update(entity);
+        TicketFlightResponseDto dto = mapper.toDto(updated);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("{id}")
     public ResponseEntity<?> findById(
             @PathVariable("no") String ticketNo,
             @PathVariable("id") Integer flightId
     ) {
         TicketFlightID entityId = buildTicketFlightID(ticketNo, flightId);
-        Optional<BoardingPass> found = boardingPassService.findById(entityId);
+        Optional<TicketFlight> found = ticketFlightService.findById(entityId);
         if (found.isPresent()) {
-            BoardingPassResponseDto dto = mapper.toDto(found.get());
+            TicketFlightResponseDto dto = mapper.toDto(found.get());
             return new ResponseEntity<>(dto, HttpStatus.OK);
         }
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping
+    @GetMapping
+    public ResponseEntity<?> findAll(@PathVariable("no") String ticketNo) {
+        List<TicketFlight> found = ticketFlightService.findByTicketNo(ticketNo);
+        return new ResponseEntity<>(
+                found.stream().map(mapper::toDto).toList(),
+                HttpStatus.OK
+        );
+    }
+
+    @DeleteMapping("{id}")
     public ResponseEntity<?> delete(
             @PathVariable("no") String ticketNo,
             @PathVariable("id") Integer flightId
     ) {
         TicketFlightID entityId = buildTicketFlightID(ticketNo, flightId);
-        Optional<BoardingPass> found = boardingPassService.findById(entityId);
+        Optional<TicketFlight> found = ticketFlightService.findById(entityId);
         if (found.isPresent()) {
-            boardingPassService.delete(entityId);
+            ticketFlightService.delete(entityId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
 }

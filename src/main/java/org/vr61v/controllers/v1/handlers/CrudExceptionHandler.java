@@ -1,4 +1,4 @@
-package org.vr61v.handlers;
+package org.vr61v.controllers.v1.handlers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;

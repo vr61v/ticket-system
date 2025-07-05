@@ -10,7 +10,6 @@ import java.util.List;
 @Repository
 public interface FlightRepository extends JpaRepository<Flight, Integer> {
 
-
     @Query("SELECT f FROM Flight f JOIN FETCH f.aircraft JOIN FETCH f.arrivalAirport JOIN FETCH f.departureAirport WHERE f.flightNo = :flightNo")
     List<Flight> findFlightByFlightNo(String flightNo);
 

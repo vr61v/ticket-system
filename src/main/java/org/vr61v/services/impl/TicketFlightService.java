@@ -1,7 +1,7 @@
 package org.vr61v.services.impl;
 
 import org.springframework.stereotype.Service;
-import org.vr61v.embedded.TicketFlightID;
+import org.vr61v.entities.embedded.TicketFlightID;
 import org.vr61v.entities.TicketFlight;
 import org.vr61v.repositories.TicketFlightRepository;
 import org.vr61v.services.CrudService;
@@ -18,12 +18,8 @@ public class TicketFlightService extends CrudService<TicketFlight, TicketFlightI
         this.ticketFlightRepository = ticketFlightRepository;
     }
 
-    public List<TicketFlight> findTicketFlightsByTicketNo(String ticketNo) {
+    public List<TicketFlight> findByTicketNo(String ticketNo) {
         return ticketFlightRepository.findTicketFlightsByTicketNo(ticketNo);
-    }
-
-    public void deleteTicketFlightsByTicketNo(String ticketNo) {
-        ticketFlightRepository.deleteTicketFlightsByTicketNo(ticketNo);
     }
 
 }

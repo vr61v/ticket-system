@@ -1,6 +1,8 @@
 package org.vr61v.mappers;
 
-import org.mapstruct.*;
+import org.mapstruct.Context;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.vr61v.dtos.airport.AirportRequestDto;
 import org.vr61v.dtos.airport.AirportResponseDto;
 import org.vr61v.dtos.airport.AirportResponseLocalizedDto;

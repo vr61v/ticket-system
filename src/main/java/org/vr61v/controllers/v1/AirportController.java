@@ -92,7 +92,7 @@ public class AirportController {
     public ResponseEntity<?> delete(@PathVariable("code") String code) {
         Optional<Airport> found = airportService.findById(code);
         if (found.isPresent()) {
-            airportService.deleteById(code);
+            airportService.delete(code);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 

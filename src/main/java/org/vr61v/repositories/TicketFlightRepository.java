@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.vr61v.embedded.TicketFlightID;
+import org.vr61v.entities.embedded.TicketFlightID;
 import org.vr61v.entities.TicketFlight;
 
 import java.util.List;

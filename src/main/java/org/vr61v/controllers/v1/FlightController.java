@@ -1,7 +1,6 @@
 package org.vr61v.controllers.v1;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,6 @@ import org.vr61v.types.Locale;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @RestController
 @RequestMapping("api/v1/flights")
 public class FlightController {
@@ -96,11 +94,11 @@ public class FlightController {
     }
 
     @GetMapping
-    public ResponseEntity<?> findAllByNo(
+    public ResponseEntity<?> findAll(
             @RequestParam("no") String flightNo,
             @RequestParam(value = "locale", required = false) Locale locale
     ) {
-        List<Flight> found = flightService.findFlightsByNo(flightNo);
+        List<Flight> found = flightService.findByFlightNo(flightNo);
         if (locale == null) {
             return new ResponseEntity<>(
                     found.stream().map(mapper::toDto).toList(),
@@ -118,7 +116,7 @@ public class FlightController {
     public ResponseEntity<?> delete(@PathVariable("id") Integer flightId) {
         Optional<Flight> found = flightService.findById(flightId);
         if (found.isPresent()) {
-            flightService.deleteById(flightId);
+            flightService.delete(flightId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 

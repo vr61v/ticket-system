@@ -1,6 +1,5 @@
-package org.vr61v.embedded;
+package org.vr61v.entities.embedded;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -8,20 +7,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.vr61v.entities.Aircraft;
+import org.vr61v.entities.Flight;
+import org.vr61v.entities.Ticket;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Embeddable
-public class SeatID {
+public class TicketFlightID {
 
     @ManyToOne
-    @JoinColumn(name = "aircraft_code", nullable = false)
-    private Aircraft aircraft;
+    @JoinColumn(name = "ticket_no", nullable = false)
+    private Ticket ticket;
 
-    @Column(name = "seat_no", length = 4, nullable = false)
-    private String seatNo;
+    @ManyToOne
+    @JoinColumn(name = "flight_id", nullable = false)
+    private Flight flight;
 
 }

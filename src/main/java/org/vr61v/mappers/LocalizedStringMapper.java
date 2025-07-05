@@ -2,7 +2,7 @@ package org.vr61v.mappers;
 
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
-import org.vr61v.embedded.LocalizedString;
+import org.vr61v.entities.embedded.LocalizedString;
 import org.vr61v.types.Locale;
 
 @Mapper(componentModel = "spring")

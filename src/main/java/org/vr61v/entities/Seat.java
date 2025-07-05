@@ -1,8 +1,11 @@
 package org.vr61v.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.vr61v.embedded.SeatID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.vr61v.entities.embedded.SeatID;
 import org.vr61v.types.FareCondition;
 
 @Data

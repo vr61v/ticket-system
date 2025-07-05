@@ -17,7 +17,8 @@ public class TicketService extends CrudService<Ticket, String> {
         this.ticketRepository = repository;
     }
 
-    public List<Ticket> findTicketsByBookRef(String bookRef) {
+    public List<Ticket> findByBookRef(String bookRef) {
         return ticketRepository.findTicketByBooking_BookRef(bookRef);
     }
+
 }

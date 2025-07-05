@@ -82,7 +82,7 @@ public class TicketController {
 
     @GetMapping
     public ResponseEntity<?> findAllByBookRef(@RequestParam String bookRef) {
-        List<Ticket> found = ticketService.findTicketsByBookRef(bookRef);
+        List<Ticket> found = ticketService.findByBookRef(bookRef);
         return new ResponseEntity<>(
                 found.stream().map(mapper::toDto).toList(),
                 HttpStatus.OK
@@ -93,7 +93,7 @@ public class TicketController {
     public ResponseEntity<?> delete(@PathVariable("no") String ticketNo) {
         Optional<Ticket> found = ticketService.findById(ticketNo);
         if (found.isPresent()) {
-            ticketService.deleteById(ticketNo);
+            ticketService.delete(ticketNo);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 

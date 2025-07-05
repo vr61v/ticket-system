@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.vr61v.dtos.booking.BookingResponseDto;
-import org.vr61v.embedded.ContactData;
+import org.vr61v.entities.embedded.ContactData;
 
 @Data
 public class TicketResponseDto {

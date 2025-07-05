@@ -1,19 +1,12 @@
-package org.vr61v.dtos;
+package org.vr61v.dtos.ticketFlight;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.vr61v.types.FareCondition;
 
 @Data
-public class TicketFlightDto {
-
-    @Size(min = 13, max = 13)
-    private String ticketNo;
-
-    @Positive
-    private Integer flightId;
+public class TicketFlightRequestDto {
 
     @NotNull
     private FareCondition fareConditions;

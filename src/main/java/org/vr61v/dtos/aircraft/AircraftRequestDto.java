@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
-import org.vr61v.embedded.LocalizedString;
+import org.vr61v.entities.embedded.LocalizedString;
 
 @Data
 public class AircraftRequestDto {

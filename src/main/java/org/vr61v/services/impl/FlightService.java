@@ -17,7 +17,7 @@ public class FlightService extends CrudService<Flight, Integer> {
         this.flightRepository = flightRepository;
     }
 
-    public List<Flight> findFlightsByNo(String flightNo) {
+    public List<Flight> findByFlightNo(String flightNo) {
         return flightRepository.findFlightByFlightNo(flightNo);
     }
 }

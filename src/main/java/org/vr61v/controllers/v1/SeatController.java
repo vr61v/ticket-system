@@ -1,13 +1,13 @@
 package org.vr61v.controllers.v1;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.vr61v.dtos.seat.SeatRequestDto;
 import org.vr61v.dtos.seat.SeatResponseDto;
-import org.vr61v.embedded.SeatID;
+import org.vr61v.entities.embedded.SeatID;
 import org.vr61v.entities.Aircraft;
 import org.vr61v.entities.Seat;
 import org.vr61v.mappers.SeatMapper;
@@ -17,7 +17,6 @@ import org.vr61v.services.impl.SeatService;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @RestController
 @RequestMapping("api/v1/aircrafts/{code}/seats")
 public class SeatController {
@@ -41,7 +40,7 @@ public class SeatController {
     private SeatID buildSeatID(String aircraftCode, String ticketNo) {
         Optional<Aircraft> aircraft = aircraftService.findById(aircraftCode);
         if (aircraft.isEmpty()) {
-            throw new IllegalArgumentException("aircraft not found");
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
         }
 
         return SeatID.builder()
@@ -97,7 +96,7 @@ public class SeatController {
 
     @GetMapping
     public ResponseEntity<?> findAll(@PathVariable("code") String aircraftCode) {
-        List<Seat> found = seatService.findSeatsByAircraftCode(aircraftCode);
+        List<Seat> found = seatService.findByAircraftCode(aircraftCode);
         List<SeatResponseDto> dtos = found.stream().map(mapper::toDto).toList();
         if (!dtos.isEmpty()) {
             return new ResponseEntity<>(dtos, HttpStatus.OK);
@@ -114,7 +113,7 @@ public class SeatController {
         SeatID entityId = buildSeatID(aircraftCode, ticketNo);
         Optional<Seat> found = seatService.findById(entityId);
         if (found.isPresent()) {
-            seatService.deleteById(entityId);
+            seatService.delete(entityId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -125,7 +124,7 @@ public class SeatController {
     public ResponseEntity<?> deleteAll(@PathVariable("code") String aircraftCode) {
         Optional<Aircraft> found = aircraftService.findById(aircraftCode);
         if (found.isPresent()) {
-            seatService.deleteSeatsByAircraftCode(aircraftCode);
+            seatService.deleteByAircraftCode(aircraftCode);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
