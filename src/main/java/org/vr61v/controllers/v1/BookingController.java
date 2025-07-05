@@ -32,7 +32,6 @@ public class BookingController {
         this.mapper = mapper;
     }
 
-
     @PostMapping("/{ref}")
     public ResponseEntity<?> create(
             @PathVariable("ref") String ref,

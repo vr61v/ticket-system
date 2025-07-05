@@ -13,4 +13,5 @@ public interface TicketRepository extends JpaRepository<Ticket, String> {
     @Query("SELECT t FROM Ticket t JOIN FETCH t.booking")
     List<Ticket> findAll();
 
+    List<Ticket> findTicketByBooking_BookRef(String bookRef);
 }
