@@ -22,6 +22,7 @@ import java.util.Optional;
 public class BookingController {
     
     private final BookingService bookingService;
+
     private final BookingMapper mapper;
 
     public BookingController(
