@@ -1,6 +1,7 @@
 package controllers;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,24 +18,21 @@ import org.vr61v.mappers.AircraftMapper;
 import org.vr61v.services.impl.AircraftService;
 import org.vr61v.types.Locale;
 
+import java.util.List;
+import java.util.Optional;
+
+import static controllers.CommonAssertions.assertErrorResponse;
+import static controllers.CommonAssertions.assertSuccessfulResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class AircraftControllerUnitTest {
 
     private static final String CODE = "000";
     private static final String NOT_FOUND_CODE = "NOT_FOUND";
-
-    private static final LocalizedString MODEL = LocalizedString.builder()
-            .ru("модель")
-            .en("model")
-            .build();
-
+    private static final LocalizedString MODEL = new LocalizedString("model", "модель");
     private static final Integer RANGE = 5000;
 
     private static final Aircraft AIRCRAFT = Aircraft.builder()
@@ -225,20 +223,4 @@ class AircraftControllerUnitTest {
         assertErrorResponse(response, HttpStatus.NOT_FOUND);
     }
 
-    private void assertSuccessfulResponse(ResponseEntity<?> response, HttpStatus expectedStatus, Object expectedBody) {
-        assertThat(response)
-                .isNotNull()
-                .extracting(
-                        ResponseEntity::getStatusCode,
-                        ResponseEntity::getBody
-                )
-                .containsExactly(expectedStatus, expectedBody);
-    }
-
-    private void assertErrorResponse(ResponseEntity<?> response, HttpStatus expectedStatus) {
-        assertThat(response)
-                .isNotNull()
-                .extracting(ResponseEntity::getStatusCode)
-                .isEqualTo(expectedStatus);
-    }
 }
