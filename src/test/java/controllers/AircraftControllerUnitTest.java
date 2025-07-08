@@ -1,12 +1,10 @@
 package controllers;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.vr61v.controllers.v1.AircraftController;
@@ -20,19 +18,23 @@ import org.vr61v.services.impl.AircraftService;
 import org.vr61v.types.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@SpringBootTest
-@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class AircraftControllerUnitTest {
 
     private static final String CODE = "000";
-    private static final LocalizedString MODEL = LocalizedString.builder().ru("модель").en("model").build();
+    private static final String NOT_FOUND_CODE = "NOT_FOUND";
+
+    private static final LocalizedString MODEL = LocalizedString.builder()
+            .ru("модель")
+            .en("model")
+            .build();
+
     private static final Integer RANGE = 5000;
 
     private static final Aircraft AIRCRAFT = Aircraft.builder()
@@ -69,212 +71,174 @@ class AircraftControllerUnitTest {
             .build();
 
     private static final List<AircraftResponseLocalizedDto> RESPONSE_LOCALIZED_RU_LIST = List.of(RESPONSE_LOCALIZED_RU);
+
     private static final List<AircraftResponseLocalizedDto> RESPONSE_LOCALIZED_EN_LIST = List.of(RESPONSE_LOCALIZED_EN);
 
+    @Mock
+    private AircraftService aircraftService;
+
+    @Mock
+    private AircraftMapper aircraftMapper;
+
+    @InjectMocks
+    private AircraftController aircraftController;
+
     @Test
-    @DisplayName("Create aircraft success")
-    void create_ShouldCreated(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.create(CODE, REQUEST);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.CREATED)
-                .describedAs("Status code should be 201 CREATED");
-        assertThat(responseEntity.getBody())
-                .isNotNull()
-                .describedAs("Response body should not be null")
-                .isEqualTo(RESPONSE)
-                .describedAs("Response body should be equals to RESPONSE");
+    @DisplayName("Create aircraft - should return 201 CREATED with response body")
+    void create_ShouldReturnCreated() {
+        when(aircraftService.create(any())).thenReturn(AIRCRAFT);
+        when(aircraftMapper.toEntity(any())).thenReturn(AIRCRAFT);
+        when(aircraftMapper.toDto(AIRCRAFT)).thenReturn(RESPONSE);
+
+        ResponseEntity<?> response = aircraftController.create(CODE, REQUEST);
+
+        verify(aircraftService).create(argThat(aircraft ->
+                aircraft.getAircraftCode().equals(CODE) &&
+                        aircraft.getModel().equals(MODEL) &&
+                        aircraft.getRange().equals(RANGE)
+        ));
+
+        assertSuccessfulResponse(response, HttpStatus.CREATED, RESPONSE);
     }
 
     @Test
-    @DisplayName("Update aircraft success")
-    void update_ShouldUpdate(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.update(CODE, REQUEST);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.OK)
-                .describedAs("Status code should be 200 SUCCESS");
-        assertThat(responseEntity.getBody())
-                .isNotNull()
-                .describedAs("Response body should not be null")
-                .isEqualTo(RESPONSE)
-                .describedAs("Response body should be equals to RESPONSE");
+    @DisplayName("Update aircraft - should return 200 OK with updated aircraft")
+    void update_ShouldReturnOk() {
+        when(aircraftService.update(any())).thenReturn(AIRCRAFT);
+        when(aircraftMapper.toEntity(any())).thenReturn(AIRCRAFT);
+        when(aircraftMapper.toDto(AIRCRAFT)).thenReturn(RESPONSE);
+
+        ResponseEntity<?> response = aircraftController.update(CODE, REQUEST);
+
+        verify(aircraftService).update(argThat(aircraft ->
+                aircraft.getAircraftCode().equals(CODE) &&
+                        aircraft.getModel().equals(MODEL) &&
+                        aircraft.getRange().equals(RANGE)
+        ));
+
+        assertSuccessfulResponse(response, HttpStatus.OK, RESPONSE);
     }
 
     @Test
-    @DisplayName("FindById aircraft success")
-    void findById_ShouldFound(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.findById(CODE, null);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.OK)
-                .describedAs("Status code should be 200 OK");
-        assertThat(responseEntity.getBody())
-                .isNotNull()
-                .describedAs("Response body should not be null")
-                .isEqualTo(RESPONSE)
-                .describedAs("Response body should be equals to RESPONSE");
+    @DisplayName("Find aircraft by ID - should return 200 OK with aircraft data")
+    void findById_ShouldReturnAircraft() {
+        when(aircraftService.findById(CODE)).thenReturn(Optional.of(AIRCRAFT));
+        when(aircraftMapper.toDto(AIRCRAFT)).thenReturn(RESPONSE);
+
+        ResponseEntity<?> response = aircraftController.findById(CODE, null);
+
+        verify(aircraftService).findById(CODE);
+        assertSuccessfulResponse(response, HttpStatus.OK, RESPONSE);
     }
 
     @Test
-    @DisplayName("FindById aircraft not found")
-    void findById_ShouldNotFound(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.findById("NOT_FOUND", null);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.NOT_FOUND)
-                .describedAs("Status code should be 404 NOT FOUND");
+    @DisplayName("Find aircraft by ID with RU locale - should return localized response")
+    void findById_WithRuLocale_ShouldReturnLocalized() {
+        when(aircraftService.findById(CODE)).thenReturn(Optional.of(AIRCRAFT));
+        when(aircraftMapper.toLocalizedDto(AIRCRAFT, Locale.RU)).thenReturn(RESPONSE_LOCALIZED_RU);
+
+        ResponseEntity<?> response = aircraftController.findById(CODE, Locale.RU);
+
+        verify(aircraftService).findById(CODE);
+        assertSuccessfulResponse(response, HttpStatus.OK, RESPONSE_LOCALIZED_RU);
     }
 
     @Test
-    @DisplayName("FindById aircraft with ru locale success")
-    void findByIdLocaleRu_ShouldFound(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.findById(CODE, Locale.RU);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.OK)
-                .describedAs("Status code should be 200 OK");
-        assertThat(responseEntity.getBody())
-                .isNotNull()
-                .describedAs("Response body should not be null")
-                .isEqualTo(RESPONSE_LOCALIZED_RU)
-                .describedAs("Response body should be equals to RESPONSE_LOCALIZED_RU");
+    @DisplayName("Find aircraft by ID with EN locale - should return localized response")
+    void findById_WithEnLocale_ShouldReturnLocalized() {
+        when(aircraftService.findById(CODE)).thenReturn(Optional.of(AIRCRAFT));
+        when(aircraftMapper.toLocalizedDto(AIRCRAFT, Locale.EN)).thenReturn(RESPONSE_LOCALIZED_EN);
+
+        ResponseEntity<?> response = aircraftController.findById(CODE, Locale.EN);
+
+        verify(aircraftService).findById(CODE);
+        assertSuccessfulResponse(response, HttpStatus.OK, RESPONSE_LOCALIZED_EN);
     }
 
     @Test
-    @DisplayName("FindById aircraft with en locale success")
-    void findByIdLocaleEn_ShouldFound(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.findById(CODE, Locale.EN);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.OK)
-                .describedAs("Status code should be 200 OK");
-        assertThat(responseEntity.getBody())
-                .isNotNull()
-                .describedAs("Response body should not be null")
-                .isEqualTo(RESPONSE_LOCALIZED_EN)
-                .describedAs("Response body should be equals to RESPONSE_LOCALIZED_EN");
+    @DisplayName("Find non-existent aircraft - should return 404 NOT FOUND")
+    void findById_NonExistentAircraft_ShouldReturnNotFound() {
+        when(aircraftService.findById(NOT_FOUND_CODE)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = aircraftController.findById(NOT_FOUND_CODE, null);
+
+        verify(aircraftService).findById(NOT_FOUND_CODE);
+        assertErrorResponse(response, HttpStatus.NOT_FOUND);
     }
 
     @Test
-    @DisplayName("FindAll aircraft success")
-    void findAll_ShouldFound(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.findAll(null);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.OK)
-                .describedAs("Status code should be 200 OK");
-        assertThat(responseEntity.getBody())
-                .isNotNull()
-                .describedAs("Response body should not be null")
-                .isEqualTo(RESPONSE_LIST)
-                .describedAs("Response body should be equals to RESPONSE_LIST");
+    @DisplayName("Find all aircraft - should return list of aircraft")
+    void findAll_ShouldReturnAircraftList() {
+        when(aircraftService.findAll()).thenReturn(AIRCRAFT_LIST);
+        when(aircraftMapper.toDto(AIRCRAFT)).thenReturn(RESPONSE);
+
+        ResponseEntity<?> response = aircraftController.findAll(null);
+
+        verify(aircraftService).findAll();
+        assertSuccessfulResponse(response, HttpStatus.OK, RESPONSE_LIST);
     }
 
     @Test
-    @DisplayName("FindAll aircraft with ru locale success")
-    void findAllLocaleRu_ShouldFound(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.findAll(Locale.RU);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.OK)
-                .describedAs("Status code should be 200 OK");
-        assertThat(responseEntity.getBody())
-                .isNotNull()
-                .describedAs("Response body should not be null")
-                .isEqualTo(RESPONSE_LOCALIZED_RU_LIST)
-                .describedAs("Response body should be equals to RESPONSE_LOCALIZED_RU_LIST");
+    @DisplayName("Find all aircraft with RU locale - should return localized list")
+    void findAll_WithRuLocale_ShouldReturnLocalizedList() {
+        when(aircraftService.findAll()).thenReturn(AIRCRAFT_LIST);
+        when(aircraftMapper.toLocalizedDto(AIRCRAFT, Locale.RU)).thenReturn(RESPONSE_LOCALIZED_RU);
+
+        ResponseEntity<?> response = aircraftController.findAll(Locale.RU);
+
+        verify(aircraftService).findAll();
+        assertSuccessfulResponse(response, HttpStatus.OK, RESPONSE_LOCALIZED_RU_LIST);
     }
 
     @Test
-    @DisplayName("FindAll aircraft with en locale success")
-    void findAllLocaleEn_ShouldFound(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.findAll(Locale.EN);
-        assertThat(responseEntity)
-                .isNotNull()
-                .describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.OK)
-                .describedAs("Status code should be 200 OK");
-        assertThat(responseEntity.getBody())
-                .isNotNull()
-                .describedAs("Response body should not be null")
-                .isEqualTo(RESPONSE_LOCALIZED_EN_LIST)
-                .describedAs("Response body should be equals to RESPONSE_LOCALIZED_EN_LIST");
+    @DisplayName("Find all aircraft with EN locale - should return localized list")
+    void findAll_WithEnLocale_ShouldReturnLocalizedList() {
+        when(aircraftService.findAll()).thenReturn(AIRCRAFT_LIST);
+        when(aircraftMapper.toLocalizedDto(AIRCRAFT, Locale.EN)).thenReturn(RESPONSE_LOCALIZED_EN);
+
+        ResponseEntity<?> response = aircraftController.findAll(Locale.EN);
+
+        verify(aircraftService).findAll();
+        assertSuccessfulResponse(response, HttpStatus.OK, RESPONSE_LOCALIZED_EN_LIST);
     }
 
     @Test
-    @DisplayName("Delete aircraft success")
-    void delete_ShouldDelete(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.delete(CODE);
-        assertThat(responseEntity)
-                .isNotNull().describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.NO_CONTENT)
-                .describedAs("Status code should be 204 NO_CONTENT");
+    @DisplayName("Delete aircraft - should return 204 NO CONTENT")
+    void delete_ShouldReturnNoContent() {
+        when(aircraftService.findById(CODE)).thenReturn(Optional.of(AIRCRAFT));
+        doNothing().when(aircraftService).delete(CODE);
+
+        ResponseEntity<?> response = aircraftController.delete(CODE);
+
+        verify(aircraftService).delete(CODE);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 
     @Test
-    @DisplayName("Delete aircraft not found")
-    void delete_ShouldNotFound(@Autowired AircraftController controller) {
-        ResponseEntity<?> responseEntity = controller.delete("NOT_FOUND");
-        assertThat(responseEntity)
-                .isNotNull().describedAs("Response should be not null");
-        assertThat(responseEntity.getStatusCode())
-                .isEqualTo(HttpStatus.NOT_FOUND)
-                .describedAs("Status code should be 404 NOT_FOUND");
+    @DisplayName("Delete non-existent aircraft - should return 404 NOT FOUND")
+    void delete_NonExistentAircraft_ShouldReturnNotFound() {
+        when(aircraftService.findById(NOT_FOUND_CODE)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = aircraftController.delete(NOT_FOUND_CODE);
+
+        verify(aircraftService, never()).delete(any());
+        assertErrorResponse(response, HttpStatus.NOT_FOUND);
     }
 
-    @SpringBootConfiguration
-    static class TestConfiguration {
+    private void assertSuccessfulResponse(ResponseEntity<?> response, HttpStatus expectedStatus, Object expectedBody) {
+        assertThat(response)
+                .isNotNull()
+                .extracting(
+                        ResponseEntity::getStatusCode,
+                        ResponseEntity::getBody
+                )
+                .containsExactly(expectedStatus, expectedBody);
+    }
 
-        @Bean
-        public AircraftService aircraftService() {
-            AircraftService service = mock(AircraftService.class);
-            when(service.create(any())).thenReturn(AIRCRAFT);
-            doAnswer(invocation ->
-                    invocation.getArgument(0).equals(CODE) ?
-                            Optional.of(AIRCRAFT) :
-                            Optional.empty())
-                    .when(service)
-                    .findById(any());
-            when(service.findAll()).thenReturn(AIRCRAFT_LIST);
-            when(service.update(any())).thenReturn(AIRCRAFT);
-            doNothing().when(service).delete(any());
-            return service;
-        }
-
-        @Bean
-        public AircraftMapper aircraftMapper() {
-            AircraftMapper mapper = mock(AircraftMapper.class);
-            when(mapper.toDto(AIRCRAFT)).thenReturn(RESPONSE);
-            when(mapper.toLocalizedDto(AIRCRAFT, Locale.RU)).thenReturn(RESPONSE_LOCALIZED_RU);
-            when(mapper.toLocalizedDto(AIRCRAFT, Locale.EN)).thenReturn(RESPONSE_LOCALIZED_EN);
-            when(mapper.toEntity(any())).thenReturn(AIRCRAFT);
-            return mapper;
-        }
-
-        @Bean
-        public AircraftController aircraftController(
-                @Autowired AircraftService service, @Autowired  AircraftMapper mapper) {
-            return new AircraftController(service, mapper);
-        }
-
+    private void assertErrorResponse(ResponseEntity<?> response, HttpStatus expectedStatus) {
+        assertThat(response)
+                .isNotNull()
+                .extracting(ResponseEntity::getStatusCode)
+                .isEqualTo(expectedStatus);
     }
 }
