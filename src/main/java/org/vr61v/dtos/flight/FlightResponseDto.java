@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 import org.vr61v.dtos.aircraft.AircraftResponseDto;
 import org.vr61v.dtos.airport.AirportResponseDto;
@@ -12,6 +13,7 @@ import org.vr61v.types.FlightStatus;
 import java.time.OffsetDateTime;
 
 @Data
+@Builder
 public class FlightResponseDto {
 
     @Positive
