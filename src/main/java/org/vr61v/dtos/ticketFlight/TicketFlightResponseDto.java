@@ -3,10 +3,12 @@ package org.vr61v.dtos.ticketFlight;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 import org.vr61v.types.FareCondition;
 
 @Data
+@Builder
 public class TicketFlightResponseDto {
 
     @Size(min = 13, max = 13)

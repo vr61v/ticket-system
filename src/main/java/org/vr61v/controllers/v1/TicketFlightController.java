@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/tickets/{no}/flights")
-public class TicketFlightsController {
+public class TicketFlightController {
 
     private final TicketService ticketService;
 
@@ -32,7 +32,7 @@ public class TicketFlightsController {
 
     private final TicketFlightMapper mapper;
 
-    public TicketFlightsController(
+    public TicketFlightController(
             TicketService ticketService,
             FlightService flightService,
             TicketFlightService ticketFlightService,
