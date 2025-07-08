@@ -1,4 +1,4 @@
-package controllers;
+package controllers.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,8 +25,8 @@ import org.vr61v.types.FareCondition;
 import java.util.List;
 import java.util.Optional;
 
-import static controllers.CommonAssertions.assertErrorResponse;
-import static controllers.CommonAssertions.assertSuccessfulResponse;
+import static controllers.unit.CommonAssertions.assertErrorResponse;
+import static controllers.unit.CommonAssertions.assertSuccessfulResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TicketFlightControllerUnitTest {
 
-    private static final String TICKET_NO = "0005432000001";
+    private static final String TICKET_NO = "0000000000000";
     private static final Integer FLIGHT_ID = 1;
     private static final String NOT_FOUND_TICKET = "NOT_FOUND";
     private static final Integer NOT_FOUND_FLIGHT = -1;

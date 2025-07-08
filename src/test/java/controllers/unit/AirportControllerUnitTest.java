@@ -1,4 +1,4 @@
-package controllers;
+package controllers.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,8 @@ import org.vr61v.types.Locale;
 import java.util.List;
 import java.util.Optional;
 
-import static controllers.CommonAssertions.assertErrorResponse;
-import static controllers.CommonAssertions.assertSuccessfulResponse;
+import static controllers.unit.CommonAssertions.assertErrorResponse;
+import static controllers.unit.CommonAssertions.assertSuccessfulResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

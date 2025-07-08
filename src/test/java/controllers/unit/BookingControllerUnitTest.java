@@ -1,4 +1,4 @@
-package controllers;
+package controllers.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,8 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
-import static controllers.CommonAssertions.assertErrorResponse;
-import static controllers.CommonAssertions.assertSuccessfulResponse;
+import static controllers.unit.CommonAssertions.assertErrorResponse;
+import static controllers.unit.CommonAssertions.assertSuccessfulResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 public class BookingControllerUnitTest {
 
     private static final String BOOK_REF = "000000";
-    private static final String NOT_FOUND_REF = "XXXXXX";
+    private static final String NOT_FOUND_REF = "NOT_FOUND";
     private static final OffsetDateTime BOOK_DATE = OffsetDateTime.now();
     private static final Float TOTAL_AMOUNT = 15000.0f;
     private static final LocalDate TEST_DAY = LocalDate.now();
