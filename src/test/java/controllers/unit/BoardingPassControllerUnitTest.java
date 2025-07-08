@@ -23,8 +23,8 @@ import org.vr61v.services.impl.TicketService;
 
 import java.util.Optional;
 
-import static controllers.unit.CommonAssertions.assertErrorResponse;
-import static controllers.unit.CommonAssertions.assertSuccessfulResponse;
+import static controllers.unit.util.CommonAssertions.assertErrorResponse;
+import static controllers.unit.util.CommonAssertions.assertSuccessfulResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

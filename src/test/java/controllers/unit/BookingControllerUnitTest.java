@@ -21,8 +21,8 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
-import static controllers.unit.CommonAssertions.assertErrorResponse;
-import static controllers.unit.CommonAssertions.assertSuccessfulResponse;
+import static controllers.unit.util.CommonAssertions.assertErrorResponse;
+import static controllers.unit.util.CommonAssertions.assertSuccessfulResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
