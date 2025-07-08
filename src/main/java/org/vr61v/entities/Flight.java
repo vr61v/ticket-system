@@ -18,8 +18,8 @@ import java.time.OffsetDateTime;
 public class Flight {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "flights_flight_id_seq")
-    @SequenceGenerator(name = "flights_flight_id_seq", sequenceName = "flights_flight_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "flights_flight_id_seq", sequenceName = "flights_flight_id_seq")
     @Column(name = "flight_id", nullable = false)
     private Integer flightId;
 

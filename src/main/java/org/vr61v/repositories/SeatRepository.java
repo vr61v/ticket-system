@@ -4,8 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.vr61v.embedded.SeatID;
 import org.vr61v.entities.Seat;
+import org.vr61v.entities.embedded.SeatID;
 
 import java.util.List;
 
@@ -14,7 +14,6 @@ public interface SeatRepository extends JpaRepository<Seat, SeatID> {
 
     @Query("SELECT s FROM Seat s WHERE s.id.aircraft.aircraftCode = :aircraftCode")
     List<Seat> findSeatsByAircraftCode(String aircraftCode);
-
 
     @Modifying
     @Query(value = "DELETE FROM Seat s WHERE s.id.aircraft.aircraftCode = :aircraftCode")
